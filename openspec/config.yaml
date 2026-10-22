@@ -1,32 +1,44 @@
 schema: spec-driven
 
-# Project context (optional)
-# Add only constraints that should guide OpenSpec artifacts and workflows.
-# Include constraints an agent cannot infer by reading the code.
-# Keep general project documentation and discoverable codebase facts out.
-# Example:
-#   context: |
-#     Designs and tasks must cover Windows, macOS, and Linux
-#     Write all artifacts in Spanish
+context: |
+  Purpose: a practice tool that migrates projects from one work-management tool to another (starting source: a Wrike-like API, starting target: a Jira-like API).
+  Built to learn spec-driven development with OpenSpec, not for production use.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  Clean room: this repo contains no client-code, data, names, or configuration.
+  All examples and fixtures are synthetic (Space A, Team X, user1@example.com)
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+  Stack: Python 3.11, FastAPI, Pydantic, Pytest, OpenSpec, React + Vite frontend
+  No database: state lives in JSON files on disk
+
+  Shape of the pipeline: extract (read source), transform (pure, offline), load (write target).
+  Transform never calls a network API.
+
+  principles:
+    - Deterministic: the same input and config always produce the same output.
+    No guessing at transform time; anything ambiguous becomes an explicit config decision
+    made by the operator.
+    - Dry-run by default: every write path previews first and writes only with an explicit
+    execute flag.
+    - Idempotent loading: re-running a load should never create duplicates.
+    - The human is the orchestrator that makes the selections in the UI
+    - External APIs are mocked in tests; no test makes a real network call
+
+rules:
+  proposal:
+    - State the user-visible problem first, then the change, in under a page
+    - List what is explicitly out of scope
+    - Name any new config the operator must decide
+  specs:
+    - Write requirements with SHALL or MUST, one behavior per requirement
+    - Every requirement has at least one scenario in 'GIVEN / WHEN / THEN' form
+    - Include a failure or edge case scenario for every requirement that reads external data (empty, missing field, duplicate, too large)
+    - Describe behavior, not implementation. No function or file names
+  design:
+    - Only write design.md when the change touches more than one pipeline stage or adds a new external API call
+    - Record each decision with the alternative rejected and why
+    - Call out any API limits, pagination or rate-limit assumptions
+  tasks:
+    - Tasks are small enough to finish and test in one setting
+    - Every task that adds behavior names the test that proves it
+    - Tests come before or with the code, never after as a separate task
+    - No task writes to a real external system
